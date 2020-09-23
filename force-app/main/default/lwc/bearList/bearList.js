@@ -13,7 +13,7 @@ import LightningElementBacon from 'c/baconComponent';
 export default class BearList extends NavigationMixin(LightningElementBacon) {
     bears;
 
-    bearFetchError;
+    bearFetchError = false;
 
     loading = true;
 
@@ -48,7 +48,7 @@ export default class BearList extends NavigationMixin(LightningElementBacon) {
     }
 
     get bearsAvailable() {
-      return !this.loading && this.bears.length > 0;
+      return !this.loading;
     }
 
     handleBearView(event) {

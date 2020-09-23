@@ -768,12 +768,12 @@ function doLogT(args) {
     };
 }
 
-function doEventT(args) {
-    return function (event, sink) {
-        f(event);
-        return sink(event);
-    };
-}
+// function doEventT(args) {
+//     return function (event, sink) {
+//         f(event);
+//         return sink(event);
+//     };
+// }
 
 function doErrorT(f) {
     return function (event, sink) {
@@ -2934,13 +2934,13 @@ var Observable = /** @class */ (function () {
         }
         return this.transform(doLogT(args), new Desc(this, "doLog", args));
     };
-    Observable.prototype.doEvent = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        return this.transform(doEventT(args), new Desc(this, "doEvent", args));
-    };
+    // Observable.prototype.doEvent = function () {
+    //     var args = [];
+    //     for (var _i = 0; _i < arguments.length; _i++) {
+    //         args[_i] = arguments[_i];
+    //     }
+    //     return this.transform(doEventT(args), new Desc(this, "doEvent", args));
+    // };
     Observable.prototype.endAsValue = function () {
         return endAsValue(this);
     };

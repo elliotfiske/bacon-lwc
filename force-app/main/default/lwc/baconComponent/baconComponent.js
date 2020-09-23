@@ -4,7 +4,7 @@ import { fromBinder } from 'c/bigbacon';
 
 import { MessageContext, subscribe, unsubscribe } from 'lightning/messageService';
 
-class LightningElementBacon extends LightningElement {
+export default class LightningElementBacon extends LightningElement {
   baconizeEvent(selector, eventName) {
     return fromBinder((sink) => {
       this.template
@@ -62,8 +62,4 @@ class LightningElementBacon extends LightningElement {
       unsubCallback();
     });
   }
-}
-
-module.exports = {
-  LightningElementBacon,
 }
