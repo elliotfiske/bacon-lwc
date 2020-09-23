@@ -1,4 +1,7 @@
 module.exports = {
+  plugins: [
+    "bacon-lwc"
+  ],
   env: {
     browser: true,
     es2021: true,
@@ -11,5 +14,6 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
+    'bacon-lwc/no-dangling-subscribe': 'error'
   },
 };

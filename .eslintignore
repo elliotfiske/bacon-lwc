@@ -4,3 +4,5 @@
 **/lwc/**/*.svg
 **/lwc/**/*.xml
 .sfdx
+no-ignoring-unsubscribe.js
+bigbacon.js

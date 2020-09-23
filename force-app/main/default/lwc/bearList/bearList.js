@@ -2,52 +2,66 @@ import { publish, MessageContext } from 'lightning/messageService';
 import BEAR_LIST_UPDATE_MESSAGE from '@salesforce/messageChannel/BearListUpdate__c';
 
 import { NavigationMixin } from 'lightning/navigation';
-import { LightningElement, wire } from 'lwc';
+import { wire } from 'lwc';
 /** BearController.searchBears(searchTerm) Apex method */
 import searchBears from '@salesforce/apex/BearController.searchBears';
-export default class BearList extends NavigationMixin(LightningElement) {
-    searchTerm = '';
 
+import * as Bacon from 'c/bigbacon';
+
+import LightningElementBacon from 'c/baconComponent';
+
+export default class BearList extends NavigationMixin(LightningElementBacon) {
     bears;
+
+    bearFetchError;
+
+    loading = true;
 
     @wire(MessageContext) messageContext;
 
-    @wire(searchBears, { searchTerm: '$searchTerm' })
-    loadBears(result) {
-        this.bears = result;
-        if (result.data) {
-            const message = {
-                bears: result.data
-            };
-            publish(this.messageContext, BEAR_LIST_UPDATE_MESSAGE, message);
-        }
+    childrenReadyCallback() {
+      Bacon.fromEvent(this.template.querySelector('lightning-input'), 'change')
+        .doAction(() => {
+          this.loading = true;
+        })
+        .map((textChangedEvent) => (textChangedEvent.target.value))
+        .debounce(300)
+        .startWith('')
+        .flatMapLatest((searchInput) => Bacon.fromPromise(searchBears({ searchTerm: searchInput })))
+        .doAction((searchResult) => {
+          this.bears = searchResult;
+          this.loading = false;
+        })
+        .map((searchResult) => ({ bears: searchResult }))
+        .doError((err) => {
+          this.bearFetchError = err;
+          this.loading = false;
+        })
+        .onValue((message) => {
+          publish(this.messageContext, BEAR_LIST_UPDATE_MESSAGE, message);
+        })
+        .unsubscribeOnDisconnect(this);
     }
 
-    handleSearchTermChange(event) {
-        // Debouncing this method: do not update the reactive property as
-        // long as this function is being called within a delay of 300 ms.
-        // This is to avoid a very large number of Apex method calls.
-        window.clearTimeout(this.delayTimeout);
-        const searchTerm = event.target.value;
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
-        this.delayTimeout = setTimeout(() => {
-            this.searchTerm = searchTerm;
-        }, 300);
+    get showNoResultsMessage() {
+      return !this.loading && this.bears.length === 0;
     }
-    get hasResults() {
-        return this.bears.data.length > 0;
+
+    get bearsAvailable() {
+      return !this.loading && this.bears.length > 0;
     }
+
     handleBearView(event) {
-        // Get bear record id from bearview event
-        const bearId = event.detail;
-        // Navigate to bear record page
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
-            attributes: {
-                recordId: bearId,
-                objectApiName: 'Bear__c',
-                actionName: 'view'
-            }
-        });
+      // Get bear record id from bearview event
+      const bearId = event.detail;
+      // Navigate to bear record page
+      this[NavigationMixin.Navigate]({
+        type: 'standard__recordPage',
+        attributes: {
+          recordId: bearId,
+          objectApiName: 'Bear__c',
+          actionName: 'view',
+        },
+      });
     }
 }
